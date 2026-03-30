@@ -41,7 +41,8 @@ tr:hover td{background:#fafaf5}
 .badge-blue{background:#E6F1FB;color:#185FA5}
 .badge-teal{background:#E1F5EE;color:#0F6E56}
 .btn-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:2px 6px;border-radius:4px}
-.btn-del:hover{color:#A32D2D;background:#FCEBEB}
+..btn-edit{background:none;border:none;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px}
+.btn-edit:hover{background:#E6F1FB}
 .modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;padding:20px}
 .modal-bg.open{display:flex}
 .modal{background:#fff;border-radius:16px;padding:20px;width:100%;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,0.12)}
@@ -246,7 +247,15 @@ function closeModal(){document.getElementById('modal-bg').classList.remove('open
 async function saveModal(){
   try{
     if(currentModal==='animal'){
-      var obj={id:document.getElementById('f-id').value,name:document.getElementById('f-name').value,type:document.getElementById('f-type').value,age:+document.getElementById('f-age').value,health:document.getElementById('f-health').value,weight:+document.getElementById('f-weight').value};
+      var obj={id:document.getElemif(currentModal==='animal-edit'){
+  var id=document.getElementById('f-id').value;
+  var obj={name:document.getElementById('f-name').value,type:document.getElementById('f-type').value,age:+document.getElementById('f-age').value,health:document.getElementById('f-health').value,weight:+document.getElementById('f-weight').value};
+  var{error}=await sb.from('animale').update(obj).eq('id',id);
+  if(error)throw error;
+  var i=animals.findIndex(a=>a.id===id);
+  animals[i]={...animals[i],...obj};
+  renderAnimals();toast('Animal actualizat!');closeModal();return;
+}entById('f-id').value,name:document.getElementById('f-name').value,type:document.getElementById('f-type').value,age:+document.getElementById('f-age').value,health:document.getElementById('f-health').value,weight:+document.getElementById('f-weight').value};
       var{error}=await sb.from('animale').insert(obj);
       if(error)throw error;
       animals.push(obj);renderAnimals();
@@ -266,7 +275,35 @@ async function saveModal(){
   }catch(e){toast('Eroare: '+e.message)}
 }
 
-async function delAnimal(id){if(!confirm('Ștergi animalul?'))return;var{error}=await sb.from('animale').delete().eq('id',id);if(!error){animals=animals.filter(a=>a.id!==id);renderAnimals();toast('Animal șters')}}
+async function delAnimal(id){function editAnimal(id){
+  var a=animals.find(a=>a.id===id);
+  if(!a)return;
+  currentModal='animal-edit';
+  document.getElementById('modal-title').textContent='Editează animal';
+  var f=document.getElementById('modal-fields');
+  f.innerHTML=`
+    <div class="form-group"><label>ID</label><input id="f-id" value="${a.id}" disabled style="opacity:0.5"></div>
+    <div class="form-group"><label>Nume animal</label><input id="f-name" value="${a.name}"></div>
+    <div class="form-group"><label>Tip</label><select id="f-type">
+      <option ${a.type==='Vacă'?'selected':''}>Vacă</option>
+      <option ${a.type==='Taur'?'selected':''}>Taur</option>
+      <option ${a.type==='Oaie'?'selected':''}>Oaie</option>
+      <option ${a.type==='Capră'?'selected':''}>Capră</option>
+      <option ${a.type==='Țap'?'selected':''}>Țap</option>
+      <option ${a.type==='Berbec'?'selected':''}>Berbec</option>
+      <option ${a.type==='Porc'?'selected':''}>Porc</option>
+      <option ${a.type==='Cal'?'selected':''}>Cal</option>
+      <option ${a.type==='Găină'?'selected':''}>Găină</option>
+    </select></div>
+    <div class="form-group"><label>Vârstă (ani)</label><input id="f-age" type="number" value="${a.age}"></div>
+    <div class="form-group"><label>Sănătate</label><select id="f-health">
+      <option ${a.health==='Excelent'?'selected':''}>Excelent</option>
+      <option ${a.health==='Bun'?'selected':''}>Bun</option>
+      <option ${a.health==='Slab'?'selected':''}>Slab</option>
+    </select></div>
+    <div class="form-group"><label>Greutate (kg)</label><input id="f-weight" type="number" value="${a.weight}"></div>`;
+  document.getElementById('modal-bg').classList.add('open');
+}
 async function delTeren(id){if(!confirm('Ștergi parcela?'))return;var{error}=await sb.from('terenuri').delete().eq('id',id);if(!error){terenuri=terenuri.filter(t=>t.id!==id);renderTerenuri();toast('Parcelă ștearsă')}}
 async function delTask(id){var{error}=await sb.from('sarcini').delete().eq('id',id);if(!error){tasks=tasks.filter(t=>t.id!==id);renderTasks();toast('Sarcină ștearsă')}}
 async function toggleTask(id){var t=tasks.find(t=>t.id===id);if(!t)return;t.done=!t.done;await sb.from('sarcini').update({done:t.done}).eq('id',id);renderTasks()}
