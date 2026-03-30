@@ -178,7 +178,8 @@ function sb2(s){if(s==='Cultivat')return`<span class="badge badge-green">${s}</s
 function renderAnimals(){
   var tb=document.getElementById('animal-table');
   if(!animals.length){tb.innerHTML='<tr><td colspan="7" class="empty">Niciun animal adăugat încă. Apasă + Adaugă animal!</td></tr>';return}
-  tb.innerHTML=animals.map(a=>`<tr><td style="color:#aaa;font-size:12px">${a.id}</td><td><strong>${a.name}</strong></td><td>${a.type}</td><td>${a.age} ani</td><td>${hb(a.health)}</td><td>${a.weight} kg</td><td><button class="btn-del" onclick="delAnimal('${a.id}')">✕</button></td></tr>`).join('');
+  tb.innerHTML=animals.map(a=>`<tr><td style="color:#aaa;font-size:12px">${a.id}</td><td><strong>${a.name}</strong></td><td>${a.type}</td><td>${a.age} ani</td><td>${hb(a.health)}</td><td>${a.weight} kg</td><td><button class="btn-edit" onclick="editAnimal('${a.id}')">✏️</button>
+<button class="btn-del" onclick="delAnimal('${a.id}')">✕</button></td></tr>`).join('');
   var types={};animals.forEach(a=>{types[a.type]=(types[a.type]||0)+1});
   document.getElementById('animal-metrics').innerHTML=`
     <div class="metric"><div class="metric-label">Total animale</div><div class="metric-value">${animals.length}</div></div>
