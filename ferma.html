@@ -41,7 +41,8 @@ tr:hover td{background:#fafaf5}
 .badge-blue{background:#E6F1FB;color:#185FA5}
 .badge-teal{background:#E1F5EE;color:#0F6E56}
 .btn-del{background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;padding:2px 6px;border-radius:4px}
-..btn-edit{background:none;border:none;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px}
+.btn-del:hover{color:#A32D2D;background:#FCEBEB}
+.btn-edit{background:none;border:none;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px}
 .btn-edit:hover{background:#E6F1FB}
 .modal-bg{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:100;align-items:center;justify-content:center;padding:20px}
 .modal-bg.open{display:flex}
@@ -112,7 +113,7 @@ tr:hover td{background:#fafaf5}
         <button class="btn-add" onclick="openModal('teren')">+ Adaugă teren</button>
       </div>
       <table>
-        <thead><tr><th>ID</th><th>Nume</th><th>Suprafață</th><th>Cultură</th><th>Status</th><th>Utilizare</th><th></th></tr></thead>
+        <thead><tr><th>Tarlă</th><th>Parcelă</th><th>Suprafață</th><th>Cultură</th><th>Status</th><th>Utilizare</th><th></th></tr></thead>
         <tbody id="teren-table"><tr><td colspan="7" class="empty">Se încarcă...</td></tr></tbody>
       </table>
     </div>
@@ -147,7 +148,7 @@ tr:hover td{background:#fafaf5}
 
 <script>
 var SUPA_URL='https://dycabxrgczvpgwjuhxml.supabase.co';
-var SUPA_KEY='sb_publishable_x4R_OYD3TEX3VX2ZvjwF8Q_FlsvT4wE';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5Y2FieHJnY3p2cGd3anVoeG1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNzU4NjAsImV4cCI6MjA4OTk1MTg2MH0.W93uefHzEoHvcLrLTyG0ofyg2OL4-3rOcsEax3bZUgQ';
 var sb=supabase.createClient(SUPA_URL,SUPA_KEY);
 var animals=[],terenuri=[],tasks=[],currentModal='';
 
@@ -220,14 +221,14 @@ function openModal(type){
     f.innerHTML=`
       <div class="form-group"><label>ID (ex: A001)</label><input id="f-id" placeholder="A001"></div>
       <div class="form-group"><label>Nume animal</label><input id="f-name" placeholder="ex: Bella"></div>
-      <div class="form-group"><label>Tip</label><select id="f-type"><option>Vacă</option><option>Taur</option><option>Oaie</option><option>Tap</option><option>Capră</option><option>Porc</option><option>Cal</option><option>Găină</option></select></div>
+      <div class="form-group"><label>Tip</label><select id="f-type"><option>Vacă</option><option>Taur</option><option>Oaie</option><option>Capră</option><option>Porc</option><option>Cal</option><option>Găină</option></select></div>
       <div class="form-group"><label>Vârstă (ani)</label><input id="f-age" type="number" min="0" value="1"></div>
       <div class="form-group"><label>Sănătate</label><select id="f-health"><option>Excelent</option><option>Bun</option><option>Slab</option></select></div>
       <div class="form-group"><label>Greutate (kg)</label><input id="f-weight" type="number" value="100"></div>`;
   } else if(type==='teren'){
     f.innerHTML=`
-      <div class="form-group"><label>ID (ex: T01)</label><input id="f-id" placeholder="T01"></div>
-      <div class="form-group"><label>Denumire parcelă</label><input id="f-name" placeholder="ex: Câmpul Nord"></div>
+      <div class="form-group"><label>Tarlă (ex: T01)</label><input id="f-id" placeholder="T01"></div>
+      <div class="form-group"><label>Parcelă (ex: Câmpul Nord)</label><input id="f-name" placeholder="ex: Câmpul Nord"></div>
       <div class="form-group"><label>Suprafață (ha)</label><input id="f-area" type="number" step="0.1" value="5"></div>
       <div class="form-group"><label>Cultură</label><select id="f-crop"><option>Grâu</option><option>Porumb</option><option>Lucernă</option><option>Floarea-soarelui</option><option>Legume</option><option>Orz</option></select></div>
       <div class="form-group"><label>Status</label><select id="f-status"><option>Cultivat</option><option>Recoltare</option><option>Pregătire</option></select></div>
@@ -245,16 +246,17 @@ function closeModal(){document.getElementById('modal-bg').classList.remove('open
 
 async function saveModal(){
   try{
+    if(currentModal==='animal-edit'){
+      var id=document.getElementById('f-id').value;
+      var obj={name:document.getElementById('f-name').value,type:document.getElementById('f-type').value,age:+document.getElementById('f-age').value,health:document.getElementById('f-health').value,weight:+document.getElementById('f-weight').value};
+      var{error}=await sb.from('animale').update(obj).eq('id',id);
+      if(error)throw error;
+      var i=animals.findIndex(a=>a.id===id);
+      animals[i]={...animals[i],...obj};
+      renderAnimals();toast('Animal actualizat!');closeModal();return;
+    }
     if(currentModal==='animal'){
-      var obj={id:document.getElemif(currentModal==='animal-edit'){
-  var id=document.getElementById('f-id').value;
-  var obj={name:document.getElementById('f-name').value,type:document.getElementById('f-type').value,age:+document.getElementById('f-age').value,health:document.getElementById('f-health').value,weight:+document.getElementById('f-weight').value};
-  var{error}=await sb.from('animale').update(obj).eq('id',id);
-  if(error)throw error;
-  var i=animals.findIndex(a=>a.id===id);
-  animals[i]={...animals[i],...obj};
-  renderAnimals();toast('Animal actualizat!');closeModal();return;
-}entById('f-id').value,name:document.getElementById('f-name').value,type:document.getElementById('f-type').value,age:+document.getElementById('f-age').value,health:document.getElementById('f-health').value,weight:+document.getElementById('f-weight').value};
+      var obj={id:document.getElementById('f-id').value,name:document.getElementById('f-name').value,type:document.getElementById('f-type').value,age:+document.getElementById('f-age').value,health:document.getElementById('f-health').value,weight:+document.getElementById('f-weight').value};
       var{error}=await sb.from('animale').insert(obj);
       if(error)throw error;
       animals.push(obj);renderAnimals();
@@ -274,7 +276,7 @@ async function saveModal(){
   }catch(e){toast('Eroare: '+e.message)}
 }
 
-async function delAnimal(id){function editAnimal(id){
+function editAnimal(id){
   var a=animals.find(a=>a.id===id);
   if(!a)return;
   currentModal='animal-edit';
@@ -303,6 +305,8 @@ async function delAnimal(id){function editAnimal(id){
     <div class="form-group"><label>Greutate (kg)</label><input id="f-weight" type="number" value="${a.weight}"></div>`;
   document.getElementById('modal-bg').classList.add('open');
 }
+
+async function delAnimal(id){if(!confirm('Ștergi animalul?'))return;var{error}=await sb.from('animale').delete().eq('id',id);if(!error){animals=animals.filter(a=>a.id!==id);renderAnimals();toast('Animal șters')}}
 async function delTeren(id){if(!confirm('Ștergi parcela?'))return;var{error}=await sb.from('terenuri').delete().eq('id',id);if(!error){terenuri=terenuri.filter(t=>t.id!==id);renderTerenuri();toast('Parcelă ștearsă')}}
 async function delTask(id){var{error}=await sb.from('sarcini').delete().eq('id',id);if(!error){tasks=tasks.filter(t=>t.id!==id);renderTasks();toast('Sarcină ștearsă')}}
 async function toggleTask(id){var t=tasks.find(t=>t.id===id);if(!t)return;t.done=!t.done;await sb.from('sarcini').update({done:t.done}).eq('id',id);renderTasks()}
